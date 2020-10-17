@@ -13,9 +13,6 @@ my $help = <<"EOF";
         \$ perl cat.pl --help
         \$ perl cat.pl -v
         \$ perl cat.pl data.txt
-        \$ perl cat.pl /tmp/file.txt
-        \$ perl cat.pl data_01.txt data_02.txt
-        \$ perl cat.pl -c 3 data.txt
     -------------------------------------------------
 EOF
 
