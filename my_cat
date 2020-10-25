@@ -1,0 +1,65 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use Getopt::Std;
+
+my %options;
+getopts("vhc: ", \%options);
+my $help = <<EOF;
+    my_cat
+    -------------------------------------------------------
+    Синтаксис: $0 [-h|-v|-c <count>]
+    +-----------------------------------------------------+
+    -h, --help    Вывод справочной информации по cat
+    -v, --version Версия программы
+    -c [count]      Выводит n-количество строк с начала файла
+    -------------------------------------------------------
+EOF
+
+
+if ( $options{v} ) {
+    print "my_cat, version 0.02\n";
+    exit;
+}
+elsif ( $options{h} ) {
+    print($help, "\n");
+    exit;
+}
+elsif ( $options{c} ) {
+    my $arg_cl = shift or die;  # TO-DO!!!
+    print_count_line_file_up( $options{c}, $arg_cl );
+    exit;
+}
+elsif ( @ARGV > 0 ) {
+    my $arg_cl = shift;
+    full_print_file($arg_cl);
+    exit;
+}
+else {
+    print "Argument not found!\n";
+}
+
+sub print_count_line_file_up {
+    my $number = shift;
+    my $file = shift;
+    open(my $fh, '<', $file) or die $!;
+    for (my $i = 0; $i<$number; $i++) {
+        while ( my $line = <$fh> ) {
+            chomp($line);
+            print($line . "\n");
+            last;
+        }
+    }
+    close($fh);
+}
+
+
+sub full_print_file {
+    my $file = shift;
+    open(my $fh, '<', $file) or die $!;
+    while ( my $line = <$fh> ) {
+        chomp($line);
+        print($line . "\n");
+    }
+    close($fh);
+}
