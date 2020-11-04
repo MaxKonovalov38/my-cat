@@ -1,42 +1,44 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
-use Getopt::Std;
+use Getopt::Long;
+use Pod::Usage;
 
-my %options;
-getopts("vhc: ", \%options);
-my $help = <<EOF;
-    my_cat
-    -------------------------------------------------------
-    Синтаксис: $0 [-h|-v|-c <count>]
-    +-----------------------------------------------------+
-    -h, --help    Вывод справочной информации по cat
-    -v, --version Версия программы
-    -c [count]      Выводит n-количество строк с начала файла
-    -------------------------------------------------------
-EOF
+GetOptions (
+    'h|help|?' => sub { pod2usage(2) },
+    'version' => \my $version,
+    'count=i' => \my $count,
+    'number' => \my $number,
+    );
 
-
-if ( $options{v} ) {
-    print "my_cat, version 0.02\n";
+if ($version) {
+    print "Version my_cat: 0.03\n";
     exit;
 }
-elsif ( $options{h} ) {
-    print($help, "\n");
+
+if ( $count ) {
+    if ( @ARGV > 0 ) {
+        my $arg_0 = shift;
+        print_count_line_file_up($count,$arg_0);
+    }
     exit;
 }
-elsif ( $options{c} ) {
-    my $arg_cl = shift or die;  # TO-DO!!!
-    print_count_line_file_up( $options{c}, $arg_cl );
+
+if ( $number ) {
+    if ( @ARGV > 0 ) {
+        my $arg_2 = shift;
+        out_number_line($arg_2);
+    }
     exit;
 }
-elsif ( @ARGV > 0 ) {
-    my $arg_cl = shift;
-    full_print_file($arg_cl);
-    exit;
+
+if ( @ARGV > 0 ) {
+    my $arg_1 = shift;
+    full_print_file($arg_1);
 }
 else {
     print "Argument not found!\n";
+    exit;
 }
 
 sub print_count_line_file_up {
@@ -63,3 +65,31 @@ sub full_print_file {
     }
     close($fh);
 }
+
+sub out_number_line {
+    my $file = shift;
+    my $n = 0;
+    open(my $fh, '<', $file) or die $!;
+    while ( my $line = <$fh> ) {
+        chomp($line);
+        $n += 1;
+        print($n, "  ", $line . "\n");
+    }
+    close($fh);
+}
+
+__END__
+
+=head1 NAME
+
+my_cat - утилита для вывода содержимого одного или нескольких текстовых файлов на экран.
+
+=head1 SYNOPSIS
+
+my_cat [options] [file]
+
+    Options:
+        --help,    -h  Вывод справочной информации по my_cat
+        --version  -v  Версия программы
+        --count    -c  Выводит n-количество строк с начала файла
+        --number   -n  Нумерация всех строк по мере их записи на стандартный вывод
