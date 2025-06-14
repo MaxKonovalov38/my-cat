@@ -1,46 +1,21 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
+
 use Getopt::Long;
 use Pod::Usage;
 
 GetOptions (
-    'h|help|?' => sub { pod2usage(2) },
-    'version' => \my $version,
-    'count=i' => \my $count,
-    'number' => \my $number,
-    );
+    'help' =>     \my $help,
+    'version' =>  \my $version,
+    'count=i' =>  \my $count,
+    'number' =>   \my $number,
+    'number-nonblank|b' => \my $num_nb,
+    ) or pod2usage(1);
 
-if ($version) {
-    print "Version my_cat: 0.03\n";
-    exit;
-}
+my $value_arg = 0;
 
-if ( $count ) {
-    if ( @ARGV > 0 ) {
-        my $arg_0 = shift;
-        print_count_line_file_up($count,$arg_0);
-    }
-    exit;
-}
-
-if ( $number ) {
-    if ( @ARGV > 0 ) {
-        my $arg_2 = shift;
-        out_number_line($arg_2);
-    }
-    exit;
-}
-
-if ( @ARGV > 0 ) {
-    my $arg_1 = shift;
-    full_print_file($arg_1);
-}
-else {
-    print "Argument not found!\n";
-    exit;
-}
-
+# Функция выводит n-количество строк с начала файла
 sub print_count_line_file_up {
     my $number = shift;
     my $file = shift;
@@ -55,7 +30,7 @@ sub print_count_line_file_up {
     close($fh);
 }
 
-
+# Фукция выводит построчно содержимое файла
 sub full_print_file {
     my $file = shift;
     open(my $fh, '<', $file) or die $!;
@@ -66,6 +41,7 @@ sub full_print_file {
     close($fh);
 }
 
+# Функция нумерации всех строк по мере их записи на стандартный вывод
 sub out_number_line {
     my $file = shift;
     my $n = 0;
@@ -78,18 +54,78 @@ sub out_number_line {
     close($fh);
 }
 
+# Функция нумерации непустых строк при выводе
+sub out_number_ne_line {
+    my $file = shift;
+    my $n = 0;
+    open(my $fh, '<', $file) or die $!;
+    while ( my $line = <$fh> ) {
+        chomp($line);
+        # Проверка, что строка состоит только из пробельных символов (включая перевод строки, пробелы, табуляцию)
+        if (!(defined $line && $line =~ /^\s*$/)) {
+            $n += 1;
+            print($n, "  ", $line . "\n");
+        }
+    }
+    close($fh);
+}
+
+if ( $help ) {
+    # Вывод полной справочной информации
+    pod2usage(-verbose => 2);
+    exit 0;
+} elsif ($version) {
+    # Вывод версии программы
+    print "Version program my_cat: 1.0.0\n";
+    exit 0;
+} elsif ( $count ) {
+    # Проверка на ввод имя файла
+    if ( @ARGV >= 1 ) {
+        $value_arg = shift;
+        print_count_line_file_up($count, $value_arg);
+    }
+    exit 0;
+} elsif ( $number ) {
+    # Проверка на ввод имя файла
+    if ( @ARGV >= 1 ) {
+        $value_arg = shift;
+        out_number_line($value_arg);
+    }
+    exit;
+} elsif ( $num_nb ) {
+    # Проверка на ввод имя файла
+    if ( @ARGV >= 1 ) {
+        $value_arg = shift;
+        out_number_ne_line($value_arg);
+    }
+} elsif ( @ARGV >= 1 ) {
+    $value_arg = shift;
+    full_print_file($value_arg);
+} else {
+    print "[ERROR] -- Argument not found!\n";
+    exit 0;
+}
+
+
 __END__
 
 =head1 NAME
 
-my_cat - утилита для вывода содержимого одного или нескольких текстовых файлов на экран.
+my_cat - a utility for displaying the contents of one or more text files on the screen.
 
 =head1 SYNOPSIS
 
-my_cat [options] [file]
+my_cat [options] (file)
 
     Options:
-        --help,    -h  Вывод справочной информации по my_cat
-        --version  -v  Версия программы
-        --count    -c  Выводит n-количество строк с начала файла
-        --number   -n  Нумерация всех строк по мере их записи на стандартный вывод
+        -h | --help             Output of reference information on my_cat
+        -v | --version          Program version
+        -c | --count            Outputs n-the number of lines from the beginning of the file
+        -n | --number           Numbering of all lines as they are written to the standard output
+        -b | --number-nonblank  To number non-empty lines in the output
+
+=head1 VERSION
+
+1.0.0
+
+=cut
